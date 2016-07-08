@@ -311,11 +311,6 @@ public class SpectateManager {
             if (isSpectating(onlinePlayers)) {
                 continue;
             }
-            if (plugin.cantspectate_permission_enabled) {
-                if (onlinePlayers.hasPermission("spectate.cantspectate")) {
-                    continue;
-                }
-            }
             spectateablePlayers.add(onlinePlayers);
         }
         return spectateablePlayers;

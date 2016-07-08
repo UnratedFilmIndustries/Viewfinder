@@ -276,16 +276,4 @@ public class SpectateListener implements Listener {
         }
     }
 
-    @EventHandler
-    public void onCommandPreprocess(PlayerCommandPreprocessEvent event) {
-        if (Spectate.getAPI().isSpectating(event.getPlayer())) {
-            if (plugin.disable_commands) {
-                if (!event.getMessage().startsWith("/spectate") && !event.getMessage().startsWith("/spec")) {
-                    event.setCancelled(true);
-                    event.getPlayer().sendMessage(ChatColor.RED + "You can not execute this command while spectating.");
-                }
-            }
-        }
-    }
-
 }

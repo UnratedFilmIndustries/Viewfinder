@@ -30,15 +30,6 @@ public class SpectateCommandExecutor implements CommandExecutor {
                 showHelp(sender);
                 return true;
             }
-            if (args[0].equalsIgnoreCase("reload")) {
-                if (!sender.isOp()) {
-                    sender.sendMessage(ChatColor.RED + "You do not have permission.");
-                    return true;
-                }
-                plugin.loadConfig();
-                sender.sendMessage(ChatColor.GRAY + "Spectate config reloaded.");
-                return true;
-            }
             if (!(sender instanceof Player)) {
                 sender.sendMessage(ChatColor.RED + "You can't execute this command from the console.");
                 return true;
@@ -173,12 +164,6 @@ public class SpectateCommandExecutor implements CommandExecutor {
                 cmdsender.sendMessage(ChatColor.GRAY + "Did you really just try to spectate yourself?");
                 return true;
             }
-            if (plugin.cantspectate_permission_enabled) {
-                if (targetPlayer.hasPermission("spectate.cantspectate")) {
-                    cmdsender.sendMessage(ChatColor.GRAY + "This person can not be spectated.");
-                    return true;
-                }
-            }
             if (Spectate.getAPI().isSpectating(cmdsender)) {
                 if (targetPlayer.getName().equals(Spectate.getAPI().getTarget(cmdsender).getName())) {
                     cmdsender.sendMessage(ChatColor.GRAY + "You are already spectating them.");
@@ -219,7 +204,6 @@ public class SpectateCommandExecutor implements CommandExecutor {
         cmdsender.sendMessage(ChatColor.RED + "/spectate scan [interval] : " + ChatColor.GRAY + "Starts the scanning mode with the specified interval.");
         cmdsender.sendMessage(ChatColor.RED + "/spectate mode [1 | default] : " + ChatColor.GRAY + "Puts you into the default spectate mode.");
         cmdsender.sendMessage(ChatColor.RED + "/spectate mode [2 | scroll] : " + ChatColor.GRAY + "Puts you into scroll style mode with left click and right click controls.");
-        cmdsender.sendMessage(ChatColor.RED + "/spectate reload : " + ChatColor.GRAY + "Reloads the config.");
         cmdsender.sendMessage(ChatColor.RED + "/spectate help : " + ChatColor.GRAY + "Shows this help page.");
     }
 
