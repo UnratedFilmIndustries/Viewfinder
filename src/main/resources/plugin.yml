@@ -1,6 +1,10 @@
-name: Spectate
-main: com.Chipmunk9998.Spectate.Spectate
-version: 2.3
+name: ${project.name}
+version: ${project.version}
+description: ${project.description}
+prefix: ${project.name}
+author: LoadingByte
+main: ${main.class}
+
 commands:
     spectate:
         description: Lets you spectate another user
