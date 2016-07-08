@@ -39,7 +39,7 @@ public class SpectateManager {
                                 || roundTwoDecimals(spectator.getLocation().getZ()) != roundTwoDecimals(target.getLocation().getZ())
                                 || roundTwoDecimals(spectator.getLocation().getYaw()) != roundTwoDecimals(target.getLocation().getYaw())
                                 || roundTwoDecimals(spectator.getLocation().getPitch()) != roundTwoDecimals(target.getLocation().getPitch())) {
-                            Utils.teleportPlayer(spectator, target.getLocation());
+                            spectator.teleport(target.getLocation());
                         }
 
                         spectator.setGameMode(target.getGameMode());
