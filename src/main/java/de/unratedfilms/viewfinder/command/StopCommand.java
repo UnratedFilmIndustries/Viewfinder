@@ -6,7 +6,7 @@ import org.bukkit.entity.Player;
 import com.quartercode.quarterbukkit.api.command.Command;
 import com.quartercode.quarterbukkit.api.command.CommandHandler;
 import com.quartercode.quarterbukkit.api.command.CommandInfo;
-import de.unratedfilms.viewfinder.api.SpectateManager;
+import de.unratedfilms.viewfinder.logic.SpectateManager;
 
 public class StopCommand implements CommandHandler {
 

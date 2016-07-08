@@ -1,5 +1,5 @@
 
-package de.unratedfilms.viewfinder;
+package de.unratedfilms.viewfinder.logic;
 
 import java.util.ArrayList;
 import java.util.List;

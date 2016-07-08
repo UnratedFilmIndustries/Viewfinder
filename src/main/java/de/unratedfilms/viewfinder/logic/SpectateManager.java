@@ -1,5 +1,5 @@
 
-package de.unratedfilms.viewfinder.api;
+package de.unratedfilms.viewfinder.logic;
 
 import static de.unratedfilms.viewfinder.util.Utils.roundTwoDecimals;
 import java.util.ArrayList;
@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import org.bukkit.entity.Player;
 import com.quartercode.quarterbukkit.api.scheduler.ScheduleTask;
-import de.unratedfilms.viewfinder.PlayerState;
 import de.unratedfilms.viewfinder.main.ViewfinderPlugin;
 import de.unratedfilms.viewfinder.util.Utils;
 

@@ -1,18 +1,16 @@
 
-package de.unratedfilms.viewfinder;
+package de.unratedfilms.viewfinder.main;
 
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import com.quartercode.quarterbukkit.api.command.CommandExecutor;
-import de.unratedfilms.viewfinder.api.SpectateManager;
 import de.unratedfilms.viewfinder.command.HelpCommand;
 import de.unratedfilms.viewfinder.command.InfoCommand;
 import de.unratedfilms.viewfinder.command.StartCommand;
 import de.unratedfilms.viewfinder.command.StopCommand;
-import de.unratedfilms.viewfinder.main.ExceptionListener;
-import de.unratedfilms.viewfinder.main.ViewfinderPlugin;
+import de.unratedfilms.viewfinder.logic.SpectateManager;
 
-public class Spectate {
+public class ViewfinderPluginExecutor {
 
     public static void onEnable(ViewfinderPlugin plugin) {
 

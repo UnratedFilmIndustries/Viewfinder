@@ -1,5 +1,5 @@
 
-package de.unratedfilms.viewfinder;
+package de.unratedfilms.viewfinder.logic;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -27,7 +27,6 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.util.Vector;
-import de.unratedfilms.viewfinder.api.SpectateManager;
 
 public class SpectateListener implements Listener {
 

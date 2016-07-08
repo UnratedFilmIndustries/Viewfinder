@@ -4,7 +4,6 @@ package de.unratedfilms.viewfinder.main;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import com.quartercode.quarterbukkit.QuarterBukkitIntegration;
-import de.unratedfilms.viewfinder.Spectate;
 
 public class ViewfinderPlugin extends JavaPlugin {
 
@@ -20,14 +19,14 @@ public class ViewfinderPlugin extends JavaPlugin {
         }
 
         quarterBukkitInstalled = true;
-        Spectate.onEnable(this);
+        ViewfinderPluginExecutor.onEnable(this);
     }
 
     @Override
     public void onDisable() {
 
         if (quarterBukkitInstalled) {
-            Spectate.onDisable(this);
+            ViewfinderPluginExecutor.onDisable(this);
         }
     }
 
