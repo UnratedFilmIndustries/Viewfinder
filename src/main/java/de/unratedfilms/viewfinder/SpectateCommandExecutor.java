@@ -1,4 +1,4 @@
-package com.Chipmunk9998.Spectate;
+package de.unratedfilms.viewfinder;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -7,8 +7,8 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import com.Chipmunk9998.Spectate.api.SpectateAngle;
-import com.Chipmunk9998.Spectate.api.SpectateMode;
+import de.unratedfilms.viewfinder.api.SpectateAngle;
+import de.unratedfilms.viewfinder.api.SpectateMode;
 
 public class SpectateCommandExecutor implements CommandExecutor {
 

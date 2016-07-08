@@ -1,7 +1,7 @@
-package com.Chipmunk9998.Spectate.api;
+package de.unratedfilms.viewfinder.api;
 
-import com.Chipmunk9998.Spectate.PlayerState;
-import com.Chipmunk9998.Spectate.Spectate;
+import de.unratedfilms.viewfinder.PlayerState;
+import de.unratedfilms.viewfinder.Spectate;
 
 import net.minecraft.server.v1_8_R3.EntityPlayer;
 import net.minecraft.server.v1_8_R3.WorldServer;

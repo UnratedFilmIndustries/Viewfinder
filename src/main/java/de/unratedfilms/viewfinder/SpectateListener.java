@@ -1,8 +1,8 @@
-package com.Chipmunk9998.Spectate;
+package de.unratedfilms.viewfinder;
 
-import com.Chipmunk9998.Spectate.api.ScrollDirection;
-import com.Chipmunk9998.Spectate.api.SpectateMode;
-import com.Chipmunk9998.Spectate.api.SpectateScrollEvent;
+import de.unratedfilms.viewfinder.api.ScrollDirection;
+import de.unratedfilms.viewfinder.api.SpectateMode;
+import de.unratedfilms.viewfinder.api.SpectateScrollEvent;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;

@@ -13,7 +13,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <main.class>com.Chipmunk9998.Spectate</main.class>
+        <main.class>de.unratedfilms.viewfinder.Spectate</main.class>
     </properties>
 
     <organization>

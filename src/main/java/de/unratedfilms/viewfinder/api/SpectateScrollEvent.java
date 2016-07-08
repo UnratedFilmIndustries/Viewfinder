@@ -1,4 +1,4 @@
-package com.Chipmunk9998.Spectate.api;
+package de.unratedfilms.viewfinder.api;
 
 import java.util.ArrayList;
 

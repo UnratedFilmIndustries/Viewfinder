@@ -1,6 +1,6 @@
-package com.Chipmunk9998.Spectate;
+package de.unratedfilms.viewfinder;
 
-import com.Chipmunk9998.Spectate.api.SpectateManager;
+import de.unratedfilms.viewfinder.api.SpectateManager;
 
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
