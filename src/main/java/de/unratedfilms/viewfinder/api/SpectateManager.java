@@ -28,14 +28,9 @@ public class SpectateManager {
     private int spectateTask = -1;
 
     private HashMap<Player, ArrayList<Player>> spectators = new HashMap<Player, ArrayList<Player>>();
-    private HashMap<Player, Player> target = new HashMap<Player, Player>();
-
-    private ArrayList<String> cantClick = new ArrayList<String>();
+    private HashMap<Player, Player> targets = new HashMap<Player, Player>();
 
     private HashMap<Player, PlayerState> states = new HashMap<Player, PlayerState>();
-    private HashMap<Player, PlayerState> multiInvStates = new HashMap<Player, PlayerState>();
-
-    private ArrayList<String> inventoryOff = new ArrayList<String>();
 
     public SpectateManager(Spectate plugin) {
         this.plugin = plugin;
@@ -46,59 +41,16 @@ public class SpectateManager {
             public void run() {
                 for (Player p : plugin.getServer().getOnlinePlayers()) {
                     if (isSpectating(p)) {
-                        if (plugin.multiverseInvEnabled()) {
-                            if (!p.getWorld().getName().equals(getTarget(p).getWorld().getName())) {
-                                p.sendMessage(ChatColor.GRAY + "You were forced to stop spectating because the person you were spectating switched worlds.");
-                                stopSpectating(p, true);
-                                continue;
-                            }
+                        Player target = getTarget(p);
+                        if (roundTwoDecimals(p.getLocation().getX()) != roundTwoDecimals(target.getLocation().getX()) || roundTwoDecimals(p.getLocation().getY()) != roundTwoDecimals(target.getLocation().getY()) || roundTwoDecimals(p.getLocation().getZ()) != roundTwoDecimals(target.getLocation().getZ()) || roundTwoDecimals(p.getLocation().getYaw()) != roundTwoDecimals(target.getLocation().getYaw()) || roundTwoDecimals(p.getLocation().getPitch()) != roundTwoDecimals(target.getLocation().getPitch())) {
+                            teleport(p, target);
                         }
-                        if (roundTwoDecimals(p.getLocation().getX()) != roundTwoDecimals(getTarget(p).getLocation().getX()) || roundTwoDecimals(p.getLocation().getY()) != roundTwoDecimals(getTarget(p).getLocation().getY()) || roundTwoDecimals(p.getLocation().getZ()) != roundTwoDecimals(getTarget(p).getLocation().getZ()) || roundTwoDecimals(p.getLocation().getYaw()) != roundTwoDecimals(getTarget(p).getLocation().getYaw()) || roundTwoDecimals(p.getLocation().getPitch()) != roundTwoDecimals(getTarget(p).getLocation().getPitch())) {
-                            teleport(p, getTarget(p));
-                        }
-                        if (!inventoryOff.contains(p.getName())) {
-                            p.getInventory().setContents(getTarget(p).getInventory().getContents());
-                            p.getInventory().setArmorContents(getTarget(p).getInventory().getArmorContents());
-                            p.setItemOnCursor(getTarget(p).getItemOnCursor());
-                        }
-                        if (getTarget(p).getMaxHealth() != p.getMaxHealth()) {
-                            p.setMaxHealth(getTarget(p).getMaxHealth());
-                        }
-                        if (getTarget(p).getHealth() == 0) {
-                            p.setHealth(1);
-                        } else {
-                            if (getTarget(p).getHealth() < p.getHealth()) {
-                                double difference = p.getHealth() - getTarget(p).getHealth();
-                                p.damage(difference);
-                            } else if (getTarget(p).getHealth() > p.getHealth()) {
-                                p.setHealth(getTarget(p).getHealth());
-                            }
-                        }
-                        p.setLevel(getTarget(p).getLevel());
-                        p.setExp(getTarget(p).getExp());
-                        for (PotionEffect e : p.getActivePotionEffects()) {
-                            boolean foundPotion = false;
-                            for (PotionEffect e1 : getTarget(p).getActivePotionEffects()) {
-                                if (e1.getType() == e.getType()) {
-                                    foundPotion = true;
-                                    break;
-                                }
-                            }
-                            if (!foundPotion) {
-                                p.removePotionEffect(e.getType());
-                            }
-                        }
-                        for (PotionEffect e : getTarget(p).getActivePotionEffects()) {
-                            p.addPotionEffect(e);
-                        }
-                        if (!inventoryOff.contains(p.getName())) {
-                            p.getInventory().setHeldItemSlot(getTarget(p).getInventory().getHeldItemSlot());
-                        }
-                        if (getTarget(p).isFlying()) {
+                        if (target.isFlying()) {
                             if (!p.isFlying()) {
                                 p.setFlying(true);
                             }
                         }
+                        p.setGameMode(target.getGameMode());
                     }
                 }
             }
@@ -140,19 +92,10 @@ public class SpectateManager {
         p.hidePlayer(target);
 
         p.setPlayerListName(playerListName);
-        p.setMaxHealth(target.getMaxHealth());
-        p.setHealth(target.getHealth());
         p.teleport(target);
 
-        for (PotionEffect e : p.getActivePotionEffects()) {
-            p.removePotionEffect(e.getType());
-        }
-
-        setTarget(p, target);
+        targets.put(p, target);
         addSpectator(target, p);
-
-        p.setGameMode(target.getGameMode());
-        p.setFoodLevel(target.getFoodLevel());
 
         p.setAllowFlight(true);
 
@@ -169,7 +112,7 @@ public class SpectateManager {
         }
         p.setItemOnCursor(null);
         p.showPlayer(getTarget(p));
-        target.remove(p);
+        targets.remove(p);
     }
 
     public ArrayList<Player> getSpectateablePlayers() {
@@ -186,16 +129,12 @@ public class SpectateManager {
         return spectateablePlayers;
     }
 
-    private void setTarget(Player p, Player ptarget) {
-        target.put(p, ptarget);
-    }
-
     public Player getTarget(Player p) {
-        return target.get(p);
+        return targets.get(p);
     }
 
     public boolean isSpectating(Player p) {
-        return target.containsKey(p);
+        return targets.containsKey(p);
     }
 
     public boolean isBeingSpectated(Player p) {
@@ -236,18 +175,6 @@ public class SpectateManager {
         return spectatingPlayers;
     }
 
-    public void setModifyInventory(Player p, boolean modify) {
-        if (modify) {
-            if (inventoryOff.contains(p.getName())) {
-                inventoryOff.remove(p.getName());
-            }
-        } else {
-            if (!inventoryOff.contains(p.getName())) {
-                inventoryOff.add(p.getName());
-            }
-        }
-    }
-
     public PlayerState getPlayerState(Player p) {
         return states.get(p);
     }
@@ -257,22 +184,11 @@ public class SpectateManager {
         states.put(p, playerstate);
     }
 
-    public void saveMultiInvState(Player p, Player target) {
-        if (!p.getWorld().getName().equals(target.getWorld().getName())) {
-            p.teleport(target.getWorld().getSpawnLocation());
-            multiInvStates.put(p, new PlayerState(p));
-        }
-    }
-
     public void loadPlayerState(Player toPlayer) {
         loadPlayerState(toPlayer, toPlayer);
     }
 
     public void loadPlayerState(Player fromState, Player toPlayer) {
-        if (plugin.multiverseInvEnabled() && multiInvStates.get(fromState) != null) {
-            loadFinalState(multiInvStates.get(fromState), toPlayer);
-            multiInvStates.remove(fromState);
-        }
         loadFinalState(getPlayerState(fromState), toPlayer);
         states.remove(fromState);
     }
@@ -280,14 +196,6 @@ public class SpectateManager {
     private void loadFinalState(PlayerState state, Player toPlayer) {
         toPlayer.teleport(state.location);
 
-        toPlayer.getInventory().setContents(state.inventory);
-        toPlayer.getInventory().setArmorContents(state.armor);
-        toPlayer.setFoodLevel(state.hunger);
-        toPlayer.setMaxHealth(state.maxHealth);
-        toPlayer.setHealth(state.health);
-        toPlayer.setLevel(state.level);
-        toPlayer.setExp(state.exp);
-        toPlayer.getInventory().setHeldItemSlot(state.slot);
         toPlayer.setAllowFlight(state.allowFlight);
         toPlayer.setFlying(state.isFlying);
         toPlayer.setGameMode(state.mode);
@@ -296,10 +204,6 @@ public class SpectateManager {
             if (!state.vanishedFrom.contains(onlinePlayers)) {
                 onlinePlayers.showPlayer(toPlayer);
             }
-        }
-
-        for (PotionEffect e : state.potions) {
-            toPlayer.addPotionEffect(e);
         }
     }
 

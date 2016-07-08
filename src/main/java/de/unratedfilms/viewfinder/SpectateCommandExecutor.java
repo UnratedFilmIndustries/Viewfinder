@@ -20,10 +20,6 @@ public class SpectateCommandExecutor implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
         if (cmd.getName().equalsIgnoreCase("spectate")) {
             if (args.length == 0 || args[0].equalsIgnoreCase("help")) {
-                if (!sender.hasPermission("spectate.help") && !sender.hasPermission("spectate.on") && !sender.hasPermission("spectate.off")) {
-                    sender.sendMessage(ChatColor.RED + "You do not have permission.");
-                    return true;
-                }
                 showHelp(sender);
                 return true;
             }
@@ -33,20 +29,12 @@ public class SpectateCommandExecutor implements CommandExecutor {
             }
             Player cmdsender = (Player) sender;
             if (args[0].equalsIgnoreCase("off")) {
-                if (!cmdsender.hasPermission("spectate.off")) {
-                    cmdsender.sendMessage(ChatColor.RED + "You do not have permission.");
-                    return true;
-                }
                 if (!Spectate.getAPI().isSpectating(cmdsender)) {
                     cmdsender.sendMessage(ChatColor.GRAY + "You are not currently spectating anyone.");
                     return true;
                 }
                 cmdsender.sendMessage(ChatColor.GRAY + "You have stopped spectating " + Spectate.getAPI().getTarget(cmdsender).getName() + ".");
                 Spectate.getAPI().stopSpectating(cmdsender, true);
-                return true;
-            }
-            if (!cmdsender.hasPermission("spectate.on")) {
-                cmdsender.sendMessage(ChatColor.RED + "You do not have permission.");
                 return true;
             }
             Player targetPlayer = Bukkit.getServer().getPlayer(args[0]);
@@ -72,16 +60,8 @@ public class SpectateCommandExecutor implements CommandExecutor {
                 cmdsender.sendMessage(ChatColor.GRAY + "They are currently dead.");
                 return true;
             }
-            if (plugin.multiverseInvEnabled() && !cmdsender.getWorld().getName().equals(targetPlayer.getWorld().getName())) {
-                if (Spectate.getAPI().isSpectating(cmdsender)) {
-                    Spectate.getAPI().stopSpectating(cmdsender, true);
-                }
+            if (!Spectate.getAPI().isSpectating(cmdsender)) {
                 Spectate.getAPI().savePlayerState(cmdsender);
-                Spectate.getAPI().saveMultiInvState(cmdsender, targetPlayer);
-            } else {
-                if (!Spectate.getAPI().isSpectating(cmdsender)) {
-                    Spectate.getAPI().savePlayerState(cmdsender);
-                }
             }
             Spectate.getAPI().startSpectating(cmdsender, targetPlayer);
             return true;

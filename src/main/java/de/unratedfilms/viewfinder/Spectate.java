@@ -44,8 +44,4 @@ public class Spectate extends JavaPlugin {
         return Manager;
     }
 
-    public boolean multiverseInvEnabled() {
-        return getServer().getPluginManager().getPlugin("Multiverse-Inventories") != null && getServer().getPluginManager().getPlugin("Multiverse-Inventories").isEnabled();
-    }
-
 }
