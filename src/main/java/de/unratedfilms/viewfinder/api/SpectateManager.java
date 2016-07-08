@@ -1,32 +1,25 @@
 
 package de.unratedfilms.viewfinder.api;
 
-import java.text.DecimalFormat;
+import static de.unratedfilms.viewfinder.util.Utils.roundTwoDecimals;
 import java.util.ArrayList;
 import java.util.HashMap;
-import net.minecraft.server.v1_7_R4.EntityPlayer;
-import net.minecraft.server.v1_7_R4.WorldServer;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_7_R4.CraftServer;
-import org.bukkit.craftbukkit.v1_7_R4.CraftWorld;
-import org.bukkit.craftbukkit.v1_7_R4.entity.CraftPlayer;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import de.unratedfilms.viewfinder.PlayerState;
 import de.unratedfilms.viewfinder.Spectate;
+import de.unratedfilms.viewfinder.util.Utils;
 
 public class SpectateManager {
 
     private final Spectate                           plugin;
-    private int                                      spectateTask = -1;
+    private int                                      spectateTask        = -1;
 
-    private final HashMap<Player, ArrayList<Player>> spectators   = new HashMap<>();
-    private final HashMap<Player, Player>            targets      = new HashMap<>();
+    private final HashMap<Player, ArrayList<Player>> targetsToSpectators = new HashMap<>();
+    private final HashMap<Player, Player>            spectatorsToTargets = new HashMap<>();
 
-    private final HashMap<Player, PlayerState>       states       = new HashMap<>();
+    private final HashMap<Player, PlayerState>       states              = new HashMap<>();
 
     public SpectateManager(Spectate plugin) {
 
@@ -43,8 +36,12 @@ public class SpectateManager {
                 for (Player p : plugin.getServer().getOnlinePlayers()) {
                     if (isSpectating(p)) {
                         Player target = getTarget(p);
-                        if (roundTwoDecimals(p.getLocation().getX()) != roundTwoDecimals(target.getLocation().getX()) || roundTwoDecimals(p.getLocation().getY()) != roundTwoDecimals(target.getLocation().getY()) || roundTwoDecimals(p.getLocation().getZ()) != roundTwoDecimals(target.getLocation().getZ()) || roundTwoDecimals(p.getLocation().getYaw()) != roundTwoDecimals(target.getLocation().getYaw()) || roundTwoDecimals(p.getLocation().getPitch()) != roundTwoDecimals(target.getLocation().getPitch())) {
-                            teleport(p, target);
+                        if (roundTwoDecimals(p.getLocation().getX()) != roundTwoDecimals(target.getLocation().getX())
+                                || roundTwoDecimals(p.getLocation().getY()) != roundTwoDecimals(target.getLocation().getY())
+                                || roundTwoDecimals(p.getLocation().getZ()) != roundTwoDecimals(target.getLocation().getZ())
+                                || roundTwoDecimals(p.getLocation().getYaw()) != roundTwoDecimals(target.getLocation().getYaw())
+                                || roundTwoDecimals(p.getLocation().getPitch()) != roundTwoDecimals(target.getLocation().getPitch())) {
+                            Utils.teleport(p, target.getLocation());
                         }
                         if (target.isFlying()) {
                             if (!p.isFlying()) {
@@ -99,7 +96,7 @@ public class SpectateManager {
         p.setPlayerListName(playerListName);
         p.teleport(target);
 
-        targets.put(p, target);
+        spectatorsToTargets.put(p, target);
         addSpectator(target, p);
 
         p.setAllowFlight(true);
@@ -118,64 +115,49 @@ public class SpectateManager {
         }
         p.setItemOnCursor(null);
         p.showPlayer(getTarget(p));
-        targets.remove(p);
-    }
-
-    public ArrayList<Player> getSpectateablePlayers() {
-
-        ArrayList<Player> spectateablePlayers = new ArrayList<>();
-        for (Player onlinePlayers : plugin.getServer().getOnlinePlayers()) {
-            if (onlinePlayers.isDead()) {
-                continue;
-            }
-            if (isSpectating(onlinePlayers)) {
-                continue;
-            }
-            spectateablePlayers.add(onlinePlayers);
-        }
-        return spectateablePlayers;
+        spectatorsToTargets.remove(p);
     }
 
     public Player getTarget(Player p) {
 
-        return targets.get(p);
+        return spectatorsToTargets.get(p);
     }
 
     public boolean isSpectating(Player p) {
 
-        return targets.containsKey(p);
+        return spectatorsToTargets.containsKey(p);
     }
 
     public boolean isBeingSpectated(Player p) {
 
-        return spectators.containsKey(p);
+        return targetsToSpectators.containsKey(p);
     }
 
     private void addSpectator(Player p, Player spectator) {
 
-        if (spectators.get(p) == null) {
+        if (targetsToSpectators.get(p) == null) {
             ArrayList<Player> newSpectators = new ArrayList<>();
             newSpectators.add(spectator);
-            spectators.put(p, newSpectators);
+            targetsToSpectators.put(p, newSpectators);
         } else {
-            spectators.get(p).add(spectator);
+            targetsToSpectators.get(p).add(spectator);
         }
     }
 
     private void removeSpectator(Player p, Player spectator) {
 
-        if (spectators.get(p) != null) {
-            if (spectators.get(p).size() == 1) {
-                spectators.remove(p);
+        if (targetsToSpectators.get(p) != null) {
+            if (targetsToSpectators.get(p).size() == 1) {
+                targetsToSpectators.remove(p);
             } else {
-                spectators.get(p).remove(spectator);
+                targetsToSpectators.get(p).remove(spectator);
             }
         }
     }
 
     public ArrayList<Player> getSpectators(Player p) {
 
-        return spectators.get(p) == null ? new ArrayList<Player>() : spectators.get(p);
+        return targetsToSpectators.get(p) == null ? new ArrayList<Player>() : targetsToSpectators.get(p);
     }
 
     public ArrayList<Player> getSpectatingPlayers() {
@@ -223,53 +205,6 @@ public class SpectateManager {
             if (!state.vanishedFrom.contains(onlinePlayers)) {
                 onlinePlayers.showPlayer(toPlayer);
             }
-        }
-    }
-
-    public double roundTwoDecimals(double d) {
-
-        try {
-            DecimalFormat twoDForm = new DecimalFormat("#.##");
-            return Double.valueOf(twoDForm.format(d));
-        } catch (NumberFormatException e) {
-            return d;
-        }
-    }
-
-    private void teleport(Player p, Entity e) {
-
-        teleport(p, e.getLocation());
-    }
-
-    // Have to make a custom teleport method thanks to Acrobot
-    private void teleport(Player p, Location location) {
-
-        EntityPlayer entity = ((CraftPlayer) p).getHandle();
-
-        if (entity.dead) {
-            return;
-        }
-
-        if (entity.playerConnection == null || entity.playerConnection.isDisconnected()) {
-            return;
-        }
-
-        if (entity.passenger != null) {
-            return;
-        }
-
-        Location from = p.getLocation();
-        Location to = location;
-
-        entity.mount(null);
-
-        WorldServer fromWorld = ((CraftWorld) from.getWorld()).getHandle();
-        WorldServer toWorld = ((CraftWorld) to.getWorld()).getHandle();
-
-        if (fromWorld == toWorld) {
-            entity.playerConnection.teleport(to);
-        } else {
-            ((CraftServer) Bukkit.getServer()).getHandle().moveToWorld(entity, toWorld.dimension, true, to, true);
         }
     }
 
