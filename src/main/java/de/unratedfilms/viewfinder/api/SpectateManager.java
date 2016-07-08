@@ -1,44 +1,45 @@
+
 package de.unratedfilms.viewfinder.api;
 
-import de.unratedfilms.viewfinder.PlayerState;
-import de.unratedfilms.viewfinder.Spectate;
-
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
 import net.minecraft.server.v1_7_R4.EntityPlayer;
 import net.minecraft.server.v1_7_R4.WorldServer;
-
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_7_R4.CraftServer;
 import org.bukkit.craftbukkit.v1_7_R4.CraftWorld;
 import org.bukkit.craftbukkit.v1_7_R4.entity.CraftPlayer;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
-import org.bukkit.util.Vector;
-
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
+import de.unratedfilms.viewfinder.PlayerState;
+import de.unratedfilms.viewfinder.Spectate;
 
 public class SpectateManager {
 
-    private Spectate plugin;
-    private int spectateTask = -1;
+    private final Spectate                           plugin;
+    private int                                      spectateTask = -1;
 
-    private HashMap<Player, ArrayList<Player>> spectators = new HashMap<Player, ArrayList<Player>>();
-    private HashMap<Player, Player> targets = new HashMap<Player, Player>();
+    private final HashMap<Player, ArrayList<Player>> spectators   = new HashMap<>();
+    private final HashMap<Player, Player>            targets      = new HashMap<>();
 
-    private HashMap<Player, PlayerState> states = new HashMap<Player, PlayerState>();
+    private final HashMap<Player, PlayerState>       states       = new HashMap<>();
 
     public SpectateManager(Spectate plugin) {
+
         this.plugin = plugin;
     }
 
     private void updateSpectators() {
+
         spectateTask = plugin.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, new Runnable() {
+
+            @Override
             public void run() {
+
                 for (Player p : plugin.getServer().getOnlinePlayers()) {
                     if (isSpectating(p)) {
                         Player target = getTarget(p);
@@ -58,12 +59,14 @@ public class SpectateManager {
     }
 
     public void startSpectateTask() {
+
         if (spectateTask == -1) {
             updateSpectators();
         }
     }
 
     public void stopSpectateTask() {
+
         if (spectateTask != -1) {
             plugin.getServer().getScheduler().cancelTask(spectateTask);
             spectateTask = -1;
@@ -71,6 +74,7 @@ public class SpectateManager {
     }
 
     public void startSpectating(Player p, Player target, boolean saveState) {
+
         if (saveState) {
             savePlayerState(p);
         }
@@ -78,6 +82,7 @@ public class SpectateManager {
     }
 
     public void startSpectating(Player p, Player target) {
+
         for (Player player1 : plugin.getServer().getOnlinePlayers()) {
             player1.hidePlayer(p);
         }
@@ -103,6 +108,7 @@ public class SpectateManager {
     }
 
     public void stopSpectating(Player p, boolean loadState) {
+
         removeSpectator(getTarget(p), p);
         for (PotionEffect e : p.getActivePotionEffects()) {
             p.removePotionEffect(e.getType());
@@ -116,7 +122,8 @@ public class SpectateManager {
     }
 
     public ArrayList<Player> getSpectateablePlayers() {
-        ArrayList<Player> spectateablePlayers = new ArrayList<Player>();
+
+        ArrayList<Player> spectateablePlayers = new ArrayList<>();
         for (Player onlinePlayers : plugin.getServer().getOnlinePlayers()) {
             if (onlinePlayers.isDead()) {
                 continue;
@@ -130,20 +137,24 @@ public class SpectateManager {
     }
 
     public Player getTarget(Player p) {
+
         return targets.get(p);
     }
 
     public boolean isSpectating(Player p) {
+
         return targets.containsKey(p);
     }
 
     public boolean isBeingSpectated(Player p) {
+
         return spectators.containsKey(p);
     }
 
     private void addSpectator(Player p, Player spectator) {
+
         if (spectators.get(p) == null) {
-            ArrayList<Player> newSpectators = new ArrayList<Player>();
+            ArrayList<Player> newSpectators = new ArrayList<>();
             newSpectators.add(spectator);
             spectators.put(p, newSpectators);
         } else {
@@ -152,6 +163,7 @@ public class SpectateManager {
     }
 
     private void removeSpectator(Player p, Player spectator) {
+
         if (spectators.get(p) != null) {
             if (spectators.get(p).size() == 1) {
                 spectators.remove(p);
@@ -162,11 +174,13 @@ public class SpectateManager {
     }
 
     public ArrayList<Player> getSpectators(Player p) {
-        return (spectators.get(p) == null ? new ArrayList<Player>() : spectators.get(p));
+
+        return spectators.get(p) == null ? new ArrayList<Player>() : spectators.get(p);
     }
 
     public ArrayList<Player> getSpectatingPlayers() {
-        ArrayList<Player> spectatingPlayers = new ArrayList<Player>();
+
+        ArrayList<Player> spectatingPlayers = new ArrayList<>();
         for (Player p : plugin.getServer().getOnlinePlayers()) {
             if (isSpectating(p)) {
                 spectatingPlayers.add(p);
@@ -176,24 +190,29 @@ public class SpectateManager {
     }
 
     public PlayerState getPlayerState(Player p) {
+
         return states.get(p);
     }
 
     public void savePlayerState(Player p) {
+
         PlayerState playerstate = new PlayerState(p);
         states.put(p, playerstate);
     }
 
     public void loadPlayerState(Player toPlayer) {
+
         loadPlayerState(toPlayer, toPlayer);
     }
 
     public void loadPlayerState(Player fromState, Player toPlayer) {
+
         loadFinalState(getPlayerState(fromState), toPlayer);
         states.remove(fromState);
     }
 
     private void loadFinalState(PlayerState state, Player toPlayer) {
+
         toPlayer.teleport(state.location);
 
         toPlayer.setAllowFlight(state.allowFlight);
@@ -208,6 +227,7 @@ public class SpectateManager {
     }
 
     public double roundTwoDecimals(double d) {
+
         try {
             DecimalFormat twoDForm = new DecimalFormat("#.##");
             return Double.valueOf(twoDForm.format(d));
@@ -217,11 +237,13 @@ public class SpectateManager {
     }
 
     private void teleport(Player p, Entity e) {
+
         teleport(p, e.getLocation());
     }
 
-    //Have to make a custom teleport method thanks to Acrobot
+    // Have to make a custom teleport method thanks to Acrobot
     private void teleport(Player p, Location location) {
+
         EntityPlayer entity = ((CraftPlayer) p).getHandle();
 
         if (entity.dead) {
@@ -247,7 +269,7 @@ public class SpectateManager {
         if (fromWorld == toWorld) {
             entity.playerConnection.teleport(to);
         } else {
-            ((CraftServer)Bukkit.getServer()).getHandle().moveToWorld(entity, toWorld.dimension, true, to, true);
+            ((CraftServer) Bukkit.getServer()).getHandle().moveToWorld(entity, toWorld.dimension, true, to, true);
         }
     }
 

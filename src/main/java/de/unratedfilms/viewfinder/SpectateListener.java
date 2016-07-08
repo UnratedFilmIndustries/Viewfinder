@@ -1,6 +1,6 @@
+
 package de.unratedfilms.viewfinder;
 
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Monster;
@@ -8,28 +8,38 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.entity.*;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityRegainHealthEvent;
+import org.bukkit.event.entity.EntityTargetEvent;
+import org.bukkit.event.entity.FoodLevelChangeEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
-import org.bukkit.event.player.*;
+import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerExpChangeEvent;
+import org.bukkit.event.player.PlayerGameModeChangeEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerPickupItemEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.util.Vector;
-
-import java.util.ArrayList;
 
 public class SpectateListener implements Listener {
 
     Spectate plugin;
 
     public SpectateListener(Spectate plugin) {
+
         this.plugin = plugin;
     }
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
+
         for (Player p : Spectate.getAPI().getSpectatingPlayers()) {
             event.getPlayer().hidePlayer(p);
         }
@@ -37,6 +47,7 @@ public class SpectateListener implements Listener {
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
+
         if (Spectate.getAPI().isSpectating(event.getPlayer())) {
             Spectate.getAPI().stopSpectating(event.getPlayer(), true);
         } else if (Spectate.getAPI().isBeingSpectated(event.getPlayer())) {
@@ -49,6 +60,7 @@ public class SpectateListener implements Listener {
 
     @EventHandler
     public void onPlayerDeath(PlayerDeathEvent event) {
+
         if (Spectate.getAPI().isBeingSpectated(event.getEntity())) {
             for (Player p : Spectate.getAPI().getSpectators(event.getEntity())) {
                 Spectate.getAPI().stopSpectating(p, true);
@@ -59,7 +71,8 @@ public class SpectateListener implements Listener {
 
     @EventHandler
     public void onPlayerDamage(EntityDamageEvent event) {
-        if (!(event.getEntity() instanceof Player)) {
+
+        if (! (event.getEntity() instanceof Player)) {
             return;
         }
         Player p = (Player) event.getEntity();
@@ -70,18 +83,20 @@ public class SpectateListener implements Listener {
 
     @EventHandler
     public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
+
         if (event.getDamager() instanceof Player) {
-            if (Spectate.getAPI().isSpectating((Player)event.getDamager())) {
+            if (Spectate.getAPI().isSpectating((Player) event.getDamager())) {
                 event.setCancelled(true);
             }
         }
     }
 
-    //TODO: Throwable objects don't work, arrows do.
+    // TODO: Throwable objects don't work, arrows do.
     @EventHandler
     public void onProjectileLaunch(ProjectileLaunchEvent event) {
+
         if (event.getEntity().getShooter() instanceof Player) {
-            if (Spectate.getAPI().isBeingSpectated((Player)event.getEntity().getShooter())) {
+            if (Spectate.getAPI().isBeingSpectated((Player) event.getEntity().getShooter())) {
                 Location fromLocation = event.getEntity().getLocation();
                 Vector toLocation = fromLocation.clone().getDirection().multiply(0.5);
                 Location finalLoc = fromLocation.clone().add(toLocation);
@@ -90,8 +105,9 @@ public class SpectateListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler (priority = EventPriority.HIGHEST)
     public void onFoodLevelChange(FoodLevelChangeEvent event) {
+
         if (event.getEntity() instanceof Player) {
             Player player = (Player) event.getEntity();
             if (!event.isCancelled()) {
@@ -104,8 +120,9 @@ public class SpectateListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler (priority = EventPriority.HIGHEST)
     public void onPlayerGameModeChange(PlayerGameModeChangeEvent event) {
+
         if (!event.isCancelled()) {
             if (Spectate.getAPI().isBeingSpectated(event.getPlayer())) {
                 for (Player p : Spectate.getAPI().getSpectators(event.getPlayer())) {
@@ -117,7 +134,8 @@ public class SpectateListener implements Listener {
 
     @EventHandler
     public void onInventoryOpen(InventoryOpenEvent event) {
-        if (!(event.getPlayer() instanceof Player)) {
+
+        if (! (event.getPlayer() instanceof Player)) {
             return;
         }
         Player p = (Player) event.getPlayer();
@@ -130,7 +148,8 @@ public class SpectateListener implements Listener {
 
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent event) {
-        if (!(event.getPlayer() instanceof Player)) {
+
+        if (! (event.getPlayer() instanceof Player)) {
             return;
         }
         Player p = (Player) event.getPlayer();
@@ -143,7 +162,8 @@ public class SpectateListener implements Listener {
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
-        if (!(event.getWhoClicked() instanceof Player)) {
+
+        if (! (event.getWhoClicked() instanceof Player)) {
             return;
         }
         Player p = (Player) event.getWhoClicked();
@@ -154,6 +174,7 @@ public class SpectateListener implements Listener {
 
     @EventHandler
     public void onPlayerDropItem(PlayerDropItemEvent event) {
+
         if (Spectate.getAPI().isSpectating(event.getPlayer())) {
             event.setCancelled(true);
         }
@@ -161,6 +182,7 @@ public class SpectateListener implements Listener {
 
     @EventHandler
     public void onPlayerPickupItem(PlayerPickupItemEvent event) {
+
         if (Spectate.getAPI().isSpectating(event.getPlayer())) {
             event.setCancelled(true);
         }
@@ -168,6 +190,7 @@ public class SpectateListener implements Listener {
 
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
+
         if (Spectate.getAPI().isSpectating(event.getPlayer())) {
             event.setCancelled(true);
         }
@@ -175,6 +198,7 @@ public class SpectateListener implements Listener {
 
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
+
         if (Spectate.getAPI().isSpectating(event.getPlayer())) {
             event.setCancelled(true);
         }
@@ -182,6 +206,7 @@ public class SpectateListener implements Listener {
 
     @EventHandler
     public void onPlayerRegen(EntityRegainHealthEvent event) {
+
         if (event.getEntity() instanceof Player) {
             Player p = (Player) event.getEntity();
             if (Spectate.getAPI().isSpectating(p)) {
@@ -192,6 +217,7 @@ public class SpectateListener implements Listener {
 
     @EventHandler
     public void onPlayerExpChange(PlayerExpChangeEvent event) {
+
         if (Spectate.getAPI().isSpectating(event.getPlayer())) {
             Spectate.getAPI().getTarget(event.getPlayer()).giveExp(event.getAmount());
             event.setAmount(0);
@@ -200,9 +226,10 @@ public class SpectateListener implements Listener {
 
     @EventHandler
     public void onMobTarget(EntityTargetEvent event) {
+
         if (event.getEntity() instanceof Monster) {
             if (event.getTarget() instanceof Player) {
-                if (Spectate.getAPI().isSpectating(((Player)event.getTarget()))) {
+                if (Spectate.getAPI().isSpectating((Player) event.getTarget())) {
                     event.setCancelled(true);
                 }
             }

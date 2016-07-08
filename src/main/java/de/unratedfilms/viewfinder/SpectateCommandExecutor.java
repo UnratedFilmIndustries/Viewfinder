@@ -1,3 +1,4 @@
+
 package de.unratedfilms.viewfinder;
 
 import org.bukkit.Bukkit;
@@ -17,13 +18,15 @@ public class SpectateCommandExecutor implements CommandExecutor {
 
     }
 
+    @Override
     public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
+
         if (cmd.getName().equalsIgnoreCase("spectate")) {
             if (args.length == 0 || args[0].equalsIgnoreCase("help")) {
                 showHelp(sender);
                 return true;
             }
-            if (!(sender instanceof Player)) {
+            if (! (sender instanceof Player)) {
                 sender.sendMessage(ChatColor.RED + "You can't execute this command from the console.");
                 return true;
             }
@@ -70,6 +73,7 @@ public class SpectateCommandExecutor implements CommandExecutor {
     }
 
     public void showHelp(CommandSender cmdsender) {
+
         cmdsender.sendMessage(ChatColor.RED + "Commands for Spectate:");
         cmdsender.sendMessage(ChatColor.RED + "/spectate [PlayerName] : " + ChatColor.GRAY + "Puts you into spectate mode and lets you see what the target sees.");
         cmdsender.sendMessage(ChatColor.RED + "/spectate off : " + ChatColor.GRAY + "Takes you out of spectate mode.");
