@@ -8,8 +8,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class Spectate extends JavaPlugin {
 
-    //TODO: Control command?
-
     /* Submit this to spigot in the CraftPlayer class in the teleport method \/
     if (!this.getHandle().activeContainer.a(this.getHandle())) {
         if (getHandle().activeContainer != this.getHandle().defaultContainer) {

@@ -9,5 +9,3 @@ commands:
     spectate:
         description: Lets you spectate another user
         aliases: [spec]
-    control:
-        description: Lets you control another user

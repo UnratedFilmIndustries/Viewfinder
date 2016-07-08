@@ -85,8 +85,6 @@ public class SpectateCommandExecutor implements CommandExecutor {
             }
             Spectate.getAPI().startSpectating(cmdsender, targetPlayer);
             return true;
-        } else if (cmd.getName().equalsIgnoreCase("control")) {
-            //TODO: Finish controlling
         }
         return true;
     }
