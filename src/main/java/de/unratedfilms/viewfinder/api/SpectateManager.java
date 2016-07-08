@@ -3,209 +3,152 @@ package de.unratedfilms.viewfinder.api;
 
 import static de.unratedfilms.viewfinder.util.Utils.roundTwoDecimals;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
-import org.bukkit.ChatColor;
+import java.util.List;
+import java.util.Map;
 import org.bukkit.entity.Player;
-import org.bukkit.potion.PotionEffect;
+import com.quartercode.quarterbukkit.api.scheduler.ScheduleTask;
 import de.unratedfilms.viewfinder.PlayerState;
-import de.unratedfilms.viewfinder.Spectate;
+import de.unratedfilms.viewfinder.main.ViewfinderPlugin;
 import de.unratedfilms.viewfinder.util.Utils;
 
 public class SpectateManager {
 
-    private final Spectate                           plugin;
-    private int                                      spectateTask        = -1;
+    private static ScheduleTask                    spectateTask;
 
-    private final HashMap<Player, ArrayList<Player>> targetsToSpectators = new HashMap<>();
-    private final HashMap<Player, Player>            spectatorsToTargets = new HashMap<>();
+    private static final Map<Player, Player>       spectatorsToTargets       = new HashMap<>();
+    private static final Map<Player, List<Player>> targetsToSpectators       = new HashMap<>();
 
-    private final HashMap<Player, PlayerState>       states              = new HashMap<>();
+    // The states the spectating players were in before they started spectating
+    private static final Map<Player, PlayerState>  preSpectatingPlayerStates = new HashMap<>();
 
-    public SpectateManager(Spectate plugin) {
+    public static void startSpectateTask(ViewfinderPlugin plugin) {
 
-        this.plugin = plugin;
-    }
+        if (spectateTask == null) {
+            spectateTask = new ScheduleTask(plugin) {
 
-    private void updateSpectators() {
+                @Override
+                public void run() {
 
-        spectateTask = plugin.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, new Runnable() {
+                    for (Player spectator : getAllSpectators()) {
+                        Player target = getTarget(spectator);
 
-            @Override
-            public void run() {
-
-                for (Player p : plugin.getServer().getOnlinePlayers()) {
-                    if (isSpectating(p)) {
-                        Player target = getTarget(p);
-                        if (roundTwoDecimals(p.getLocation().getX()) != roundTwoDecimals(target.getLocation().getX())
-                                || roundTwoDecimals(p.getLocation().getY()) != roundTwoDecimals(target.getLocation().getY())
-                                || roundTwoDecimals(p.getLocation().getZ()) != roundTwoDecimals(target.getLocation().getZ())
-                                || roundTwoDecimals(p.getLocation().getYaw()) != roundTwoDecimals(target.getLocation().getYaw())
-                                || roundTwoDecimals(p.getLocation().getPitch()) != roundTwoDecimals(target.getLocation().getPitch())) {
-                            Utils.teleport(p, target.getLocation());
+                        if (roundTwoDecimals(spectator.getLocation().getX()) != roundTwoDecimals(target.getLocation().getX())
+                                || roundTwoDecimals(spectator.getLocation().getY()) != roundTwoDecimals(target.getLocation().getY())
+                                || roundTwoDecimals(spectator.getLocation().getZ()) != roundTwoDecimals(target.getLocation().getZ())
+                                || roundTwoDecimals(spectator.getLocation().getYaw()) != roundTwoDecimals(target.getLocation().getYaw())
+                                || roundTwoDecimals(spectator.getLocation().getPitch()) != roundTwoDecimals(target.getLocation().getPitch())) {
+                            Utils.teleportPlayer(spectator, target.getLocation());
                         }
-                        if (target.isFlying()) {
-                            if (!p.isFlying()) {
-                                p.setFlying(true);
-                            }
+
+                        spectator.setGameMode(target.getGameMode());
+
+                        if (target.isFlying() && !spectator.isFlying()) {
+                            spectator.setFlying(true);
                         }
-                        p.setGameMode(target.getGameMode());
                     }
                 }
-            }
-        }, 0L, 1L);
-    }
 
-    public void startSpectateTask() {
-
-        if (spectateTask == -1) {
-            updateSpectators();
+            }.run(true, 0, 1);
         }
     }
 
-    public void stopSpectateTask() {
+    public static void stopSpectateTask() {
 
-        if (spectateTask != -1) {
-            plugin.getServer().getScheduler().cancelTask(spectateTask);
-            spectateTask = -1;
+        if (spectateTask != null) {
+            spectateTask.cancel();
+            spectateTask = null;
         }
     }
 
-    public void startSpectating(Player p, Player target, boolean saveState) {
+    public static void startSpectating(Player spectator, Player target) {
 
-        if (saveState) {
-            savePlayerState(p);
-        }
-        startSpectating(p, target);
+        // If the spectator was already spectating, stop that
+        stopSpectating(spectator);
+
+        // Save the current state of the spectator
+        preSpectatingPlayerStates.put(spectator, new PlayerState(spectator));
+
+        // Make the spectator invisible, hide the target from him, make him able to fly
+        Utils.setPlayerVisible(spectator, false);
+        spectator.hidePlayer(target);
+        spectator.setAllowFlight(true);
+
+        // Save that the spectator is spectating the target
+        addSpectatingRelationship(spectator, target);
     }
 
-    public void startSpectating(Player p, Player target) {
+    private static void addSpectatingRelationship(Player spectator, Player target) {
 
-        for (Player player1 : plugin.getServer().getOnlinePlayers()) {
-            player1.hidePlayer(p);
-        }
+        spectatorsToTargets.put(spectator, target);
 
-        String playerListName = p.getPlayerListName();
-
-        if (isSpectating(p)) {
-            p.showPlayer(getTarget(p));
-            removeSpectator(getTarget(p), p);
-        }
-
-        p.hidePlayer(target);
-
-        p.setPlayerListName(playerListName);
-        p.teleport(target);
-
-        spectatorsToTargets.put(p, target);
-        addSpectator(target, p);
-
-        p.setAllowFlight(true);
-
-        p.sendMessage(ChatColor.GRAY + "You are now spectating " + target.getName() + ".");
-    }
-
-    public void stopSpectating(Player p, boolean loadState) {
-
-        removeSpectator(getTarget(p), p);
-        for (PotionEffect e : p.getActivePotionEffects()) {
-            p.removePotionEffect(e.getType());
-        }
-        if (loadState) {
-            loadPlayerState(p);
-        }
-        p.setItemOnCursor(null);
-        p.showPlayer(getTarget(p));
-        spectatorsToTargets.remove(p);
-    }
-
-    public Player getTarget(Player p) {
-
-        return spectatorsToTargets.get(p);
-    }
-
-    public boolean isSpectating(Player p) {
-
-        return spectatorsToTargets.containsKey(p);
-    }
-
-    public boolean isBeingSpectated(Player p) {
-
-        return targetsToSpectators.containsKey(p);
-    }
-
-    private void addSpectator(Player p, Player spectator) {
-
-        if (targetsToSpectators.get(p) == null) {
-            ArrayList<Player> newSpectators = new ArrayList<>();
+        if (targetsToSpectators.get(target) == null) {
+            List<Player> newSpectators = new ArrayList<>();
             newSpectators.add(spectator);
-            targetsToSpectators.put(p, newSpectators);
+            targetsToSpectators.put(target, newSpectators);
         } else {
-            targetsToSpectators.get(p).add(spectator);
+            targetsToSpectators.get(target).add(spectator);
         }
     }
 
-    private void removeSpectator(Player p, Player spectator) {
+    public static void stopSpectating(Player spectator) {
 
-        if (targetsToSpectators.get(p) != null) {
-            if (targetsToSpectators.get(p).size() == 1) {
-                targetsToSpectators.remove(p);
+        Player target = getTarget(spectator);
+
+        if (target != null) {
+            // Save that the spectator is no longer spectating the target
+            removeSpectatingRelationship(spectator, target);
+
+            // Show the target to the spectator again
+            spectator.showPlayer(target);
+
+            // Apply the state the spectator had before he started spectating
+            preSpectatingPlayerStates.get(spectator).apply(spectator);
+            preSpectatingPlayerStates.remove(spectator);
+        }
+    }
+
+    private static void removeSpectatingRelationship(Player spectator, Player target) {
+
+        spectatorsToTargets.remove(spectator);
+
+        if (targetsToSpectators.get(target) != null) {
+            if (targetsToSpectators.get(target).size() == 1) {
+                targetsToSpectators.remove(target);
             } else {
-                targetsToSpectators.get(p).remove(spectator);
+                targetsToSpectators.get(target).remove(spectator);
             }
         }
     }
 
-    public ArrayList<Player> getSpectators(Player p) {
+    public static Player getTarget(Player spectator) {
 
-        return targetsToSpectators.get(p) == null ? new ArrayList<Player>() : targetsToSpectators.get(p);
+        return spectatorsToTargets.get(spectator);
     }
 
-    public ArrayList<Player> getSpectatingPlayers() {
+    public static boolean isSpectating(Player spectator) {
 
-        ArrayList<Player> spectatingPlayers = new ArrayList<>();
-        for (Player p : plugin.getServer().getOnlinePlayers()) {
-            if (isSpectating(p)) {
-                spectatingPlayers.add(p);
-            }
-        }
-        return spectatingPlayers;
+        return spectatorsToTargets.containsKey(spectator);
     }
 
-    public PlayerState getPlayerState(Player p) {
+    public static boolean isBeingSpectated(Player target) {
 
-        return states.get(p);
+        return targetsToSpectators.containsKey(target);
     }
 
-    public void savePlayerState(Player p) {
+    public static List<Player> getSpectators(Player player) {
 
-        PlayerState playerstate = new PlayerState(p);
-        states.put(p, playerstate);
+        return targetsToSpectators.get(player) == null ? Collections.<Player> emptyList() : targetsToSpectators.get(player);
     }
 
-    public void loadPlayerState(Player toPlayer) {
+    public static List<Player> getAllSpectators() {
 
-        loadPlayerState(toPlayer, toPlayer);
+        return new ArrayList<>(spectatorsToTargets.keySet());
     }
 
-    public void loadPlayerState(Player fromState, Player toPlayer) {
+    private SpectateManager() {
 
-        loadFinalState(getPlayerState(fromState), toPlayer);
-        states.remove(fromState);
-    }
-
-    private void loadFinalState(PlayerState state, Player toPlayer) {
-
-        toPlayer.teleport(state.location);
-
-        toPlayer.setAllowFlight(state.allowFlight);
-        toPlayer.setFlying(state.isFlying);
-        toPlayer.setGameMode(state.mode);
-
-        for (Player onlinePlayers : plugin.getServer().getOnlinePlayers()) {
-            if (!state.vanishedFrom.contains(onlinePlayers)) {
-                onlinePlayers.showPlayer(toPlayer);
-            }
-        }
     }
 
 }

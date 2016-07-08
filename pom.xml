@@ -13,7 +13,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <main.class>de.unratedfilms.viewfinder.Spectate</main.class>
+        <main.class>de.unratedfilms.viewfinder.main.ViewfinderPlugin</main.class>
     </properties>
 
     <organization>
@@ -47,6 +47,19 @@
             <version>1.7.10-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
+
+        <!-- QuarterBukkit -->
+        <dependency>
+            <groupId>com.quartercode</groupId>
+            <artifactId>quarterbukkit-plugin</artifactId>
+            <version>0.2.1</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.quartercode</groupId>
+            <artifactId>quarterbukkit-integration</artifactId>
+            <version>0.2.1</version>
+        </dependency>
     </dependencies>
 
     <repositories>
@@ -55,6 +68,13 @@
             <id>md5-repository</id>
             <name>MD5 Repository</name>
             <url>http://repo.md-5.net/content/groups/public</url>
+        </repository>
+
+        <!-- QuarterCode -->
+        <repository>
+            <id>quartercode-repository</id>
+            <name>QuarterCode Repository</name>
+            <url>http://repo.quartercode.com/content/groups/public/</url>
         </repository>
     </repositories>
 
@@ -69,6 +89,21 @@
                     <source>1.7</source>
                     <target>1.7</target>
                 </configuration>
+            </plugin>
+
+            <!-- Shade JAR -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>2.4.3</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
 
             <!-- Attach sources -->

@@ -2,10 +2,11 @@ name: ${project.name}
 version: ${project.version}
 description: ${project.description}
 prefix: ${project.name}
-author: LoadingByte
+authors: [LoadingByte, Chipmunk9998]
 main: ${main.class}
 
 commands:
-    spectate:
-        description: Lets you spectate another user
-        aliases: [spec]
+    viewfinder:
+        description: The main and only command for controlling the ViewFinder plugin.
+        usage: /<command> <Command Label> [Parameters ...]
+        aliases: [view]

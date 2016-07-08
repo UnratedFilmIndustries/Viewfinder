@@ -2,13 +2,8 @@
 package de.unratedfilms.viewfinder.util;
 
 import java.text.DecimalFormat;
-import net.minecraft.server.v1_7_R4.EntityPlayer;
-import net.minecraft.server.v1_7_R4.WorldServer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_7_R4.CraftServer;
-import org.bukkit.craftbukkit.v1_7_R4.CraftWorld;
-import org.bukkit.craftbukkit.v1_7_R4.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
 public class Utils {
@@ -23,35 +18,54 @@ public class Utils {
         }
     }
 
+    @SuppressWarnings ("deprecation")
+    public static Player getPlayerExact(String name) {
+
+        return Bukkit.getPlayerExact(name);
+    }
+
     // Have to make a custom teleport method thanks to Acrobot
-    public static void teleport(Player p, Location location) {
+    public static void teleportPlayer(Player player, Location location) {
 
-        EntityPlayer entity = ((CraftPlayer) p).getHandle();
+        player.teleport(location);
 
-        if (entity.dead) {
-            return;
-        }
+        // EntityPlayer entity = ((CraftPlayer) player).getHandle();
+        //
+        // if (entity.dead) {
+        // return;
+        // }
+        //
+        // if (entity.playerConnection == null || entity.playerConnection.isDisconnected()) {
+        // return;
+        // }
+        //
+        // if (entity.passenger != null) {
+        // return;
+        // }
+        //
+        // Location from = player.getLocation();
+        // Location to = location;
+        //
+        // entity.mount(null);
+        //
+        // WorldServer fromWorld = ((CraftWorld) from.getWorld()).getHandle();
+        // WorldServer toWorld = ((CraftWorld) to.getWorld()).getHandle();
+        //
+        // if (fromWorld == toWorld) {
+        // entity.playerConnection.teleport(to);
+        // } else {
+        // ((CraftServer) Bukkit.getServer()).getHandle().moveToWorld(entity, toWorld.dimension, true, to, true);
+        // }
+    }
 
-        if (entity.playerConnection == null || entity.playerConnection.isDisconnected()) {
-            return;
-        }
+    public static void setPlayerVisible(Player player, boolean visible) {
 
-        if (entity.passenger != null) {
-            return;
-        }
-
-        Location from = p.getLocation();
-        Location to = location;
-
-        entity.mount(null);
-
-        WorldServer fromWorld = ((CraftWorld) from.getWorld()).getHandle();
-        WorldServer toWorld = ((CraftWorld) to.getWorld()).getHandle();
-
-        if (fromWorld == toWorld) {
-            entity.playerConnection.teleport(to);
-        } else {
-            ((CraftServer) Bukkit.getServer()).getHandle().moveToWorld(entity, toWorld.dimension, true, to, true);
+        for (Player otherPlayer : Bukkit.getServer().getOnlinePlayers()) {
+            if (visible) {
+                otherPlayer.showPlayer(player);
+            } else {
+                otherPlayer.hidePlayer(player);
+            }
         }
     }
 

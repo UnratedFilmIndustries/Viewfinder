@@ -27,20 +27,14 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.util.Vector;
+import de.unratedfilms.viewfinder.api.SpectateManager;
 
 public class SpectateListener implements Listener {
-
-    Spectate plugin;
-
-    public SpectateListener(Spectate plugin) {
-
-        this.plugin = plugin;
-    }
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
 
-        for (Player p : Spectate.getAPI().getSpectatingPlayers()) {
+        for (Player p : SpectateManager.getAllSpectators()) {
             event.getPlayer().hidePlayer(p);
         }
     }
@@ -48,12 +42,12 @@ public class SpectateListener implements Listener {
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
 
-        if (Spectate.getAPI().isSpectating(event.getPlayer())) {
-            Spectate.getAPI().stopSpectating(event.getPlayer(), true);
-        } else if (Spectate.getAPI().isBeingSpectated(event.getPlayer())) {
-            for (Player p : Spectate.getAPI().getSpectators(event.getPlayer())) {
-                Spectate.getAPI().stopSpectating(p, true);
-                p.sendMessage(ChatColor.GRAY + "You were forced to stop spectating because the person you were spectating disconnected.");
+        if (SpectateManager.isSpectating(event.getPlayer())) {
+            SpectateManager.stopSpectating(event.getPlayer());
+        } else if (SpectateManager.isBeingSpectated(event.getPlayer())) {
+            for (Player spectator : SpectateManager.getSpectators(event.getPlayer())) {
+                SpectateManager.stopSpectating(spectator);
+                spectator.sendMessage(ChatColor.DARK_RED + "You were forced to stop spectating because the person you were spectating disconnected.");
             }
         }
     }
@@ -61,10 +55,10 @@ public class SpectateListener implements Listener {
     @EventHandler
     public void onPlayerDeath(PlayerDeathEvent event) {
 
-        if (Spectate.getAPI().isBeingSpectated(event.getEntity())) {
-            for (Player p : Spectate.getAPI().getSpectators(event.getEntity())) {
-                Spectate.getAPI().stopSpectating(p, true);
-                p.sendMessage(ChatColor.GRAY + "You were forced to stop spectating because the person you were spectating died.");
+        if (SpectateManager.isBeingSpectated(event.getEntity())) {
+            for (Player spectator : SpectateManager.getSpectators(event.getEntity())) {
+                SpectateManager.stopSpectating(spectator);
+                spectator.sendMessage(ChatColor.DARK_RED + "You were forced to stop spectating because the person you were spectating died.");
             }
         }
     }
@@ -76,7 +70,7 @@ public class SpectateListener implements Listener {
             return;
         }
         Player p = (Player) event.getEntity();
-        if (Spectate.getAPI().isSpectating(p)) {
+        if (SpectateManager.isSpectating(p)) {
             event.setCancelled(true);
         }
     }
@@ -85,7 +79,7 @@ public class SpectateListener implements Listener {
     public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
 
         if (event.getDamager() instanceof Player) {
-            if (Spectate.getAPI().isSpectating((Player) event.getDamager())) {
+            if (SpectateManager.isSpectating((Player) event.getDamager())) {
                 event.setCancelled(true);
             }
         }
@@ -96,7 +90,7 @@ public class SpectateListener implements Listener {
     public void onProjectileLaunch(ProjectileLaunchEvent event) {
 
         if (event.getEntity().getShooter() instanceof Player) {
-            if (Spectate.getAPI().isBeingSpectated((Player) event.getEntity().getShooter())) {
+            if (SpectateManager.isBeingSpectated((Player) event.getEntity().getShooter())) {
                 Location fromLocation = event.getEntity().getLocation();
                 Vector toLocation = fromLocation.clone().getDirection().multiply(0.5);
                 Location finalLoc = fromLocation.clone().add(toLocation);
@@ -111,8 +105,8 @@ public class SpectateListener implements Listener {
         if (event.getEntity() instanceof Player) {
             Player player = (Player) event.getEntity();
             if (!event.isCancelled()) {
-                if (Spectate.getAPI().isBeingSpectated(player)) {
-                    for (Player p : Spectate.getAPI().getSpectators(player)) {
+                if (SpectateManager.isBeingSpectated(player)) {
+                    for (Player p : SpectateManager.getSpectators(player)) {
                         p.setFoodLevel(event.getFoodLevel());
                     }
                 }
@@ -124,8 +118,8 @@ public class SpectateListener implements Listener {
     public void onPlayerGameModeChange(PlayerGameModeChangeEvent event) {
 
         if (!event.isCancelled()) {
-            if (Spectate.getAPI().isBeingSpectated(event.getPlayer())) {
-                for (Player p : Spectate.getAPI().getSpectators(event.getPlayer())) {
+            if (SpectateManager.isBeingSpectated(event.getPlayer())) {
+                for (Player p : SpectateManager.getSpectators(event.getPlayer())) {
                     p.setGameMode(event.getNewGameMode());
                 }
             }
@@ -139,8 +133,8 @@ public class SpectateListener implements Listener {
             return;
         }
         Player p = (Player) event.getPlayer();
-        if (Spectate.getAPI().isBeingSpectated(p)) {
-            for (Player spectators : Spectate.getAPI().getSpectators(p)) {
+        if (SpectateManager.isBeingSpectated(p)) {
+            for (Player spectators : SpectateManager.getSpectators(p)) {
                 spectators.openInventory(event.getInventory());
             }
         }
@@ -153,8 +147,8 @@ public class SpectateListener implements Listener {
             return;
         }
         Player p = (Player) event.getPlayer();
-        if (Spectate.getAPI().isBeingSpectated(p)) {
-            for (Player spectators : Spectate.getAPI().getSpectators(p)) {
+        if (SpectateManager.isBeingSpectated(p)) {
+            for (Player spectators : SpectateManager.getSpectators(p)) {
                 spectators.closeInventory();
             }
         }
@@ -167,7 +161,7 @@ public class SpectateListener implements Listener {
             return;
         }
         Player p = (Player) event.getWhoClicked();
-        if (Spectate.getAPI().isSpectating(p)) {
+        if (SpectateManager.isSpectating(p)) {
             event.setCancelled(true);
         }
     }
@@ -175,7 +169,7 @@ public class SpectateListener implements Listener {
     @EventHandler
     public void onPlayerDropItem(PlayerDropItemEvent event) {
 
-        if (Spectate.getAPI().isSpectating(event.getPlayer())) {
+        if (SpectateManager.isSpectating(event.getPlayer())) {
             event.setCancelled(true);
         }
     }
@@ -183,7 +177,7 @@ public class SpectateListener implements Listener {
     @EventHandler
     public void onPlayerPickupItem(PlayerPickupItemEvent event) {
 
-        if (Spectate.getAPI().isSpectating(event.getPlayer())) {
+        if (SpectateManager.isSpectating(event.getPlayer())) {
             event.setCancelled(true);
         }
     }
@@ -191,7 +185,7 @@ public class SpectateListener implements Listener {
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
 
-        if (Spectate.getAPI().isSpectating(event.getPlayer())) {
+        if (SpectateManager.isSpectating(event.getPlayer())) {
             event.setCancelled(true);
         }
     }
@@ -199,7 +193,7 @@ public class SpectateListener implements Listener {
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
 
-        if (Spectate.getAPI().isSpectating(event.getPlayer())) {
+        if (SpectateManager.isSpectating(event.getPlayer())) {
             event.setCancelled(true);
         }
     }
@@ -209,7 +203,7 @@ public class SpectateListener implements Listener {
 
         if (event.getEntity() instanceof Player) {
             Player p = (Player) event.getEntity();
-            if (Spectate.getAPI().isSpectating(p)) {
+            if (SpectateManager.isSpectating(p)) {
                 event.setCancelled(true);
             }
         }
@@ -218,8 +212,8 @@ public class SpectateListener implements Listener {
     @EventHandler
     public void onPlayerExpChange(PlayerExpChangeEvent event) {
 
-        if (Spectate.getAPI().isSpectating(event.getPlayer())) {
-            Spectate.getAPI().getTarget(event.getPlayer()).giveExp(event.getAmount());
+        if (SpectateManager.isSpectating(event.getPlayer())) {
+            SpectateManager.getTarget(event.getPlayer()).giveExp(event.getAmount());
             event.setAmount(0);
         }
     }
@@ -229,7 +223,7 @@ public class SpectateListener implements Listener {
 
         if (event.getEntity() instanceof Monster) {
             if (event.getTarget() instanceof Player) {
-                if (Spectate.getAPI().isSpectating((Player) event.getTarget())) {
+                if (SpectateManager.isSpectating((Player) event.getTarget())) {
                     event.setCancelled(true);
                 }
             }

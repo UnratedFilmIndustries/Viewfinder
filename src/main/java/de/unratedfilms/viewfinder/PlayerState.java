@@ -2,6 +2,7 @@
 package de.unratedfilms.viewfinder;
 
 import java.util.ArrayList;
+import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -9,26 +10,42 @@ import org.bukkit.entity.Player;
 
 public class PlayerState {
 
-    public Player            player;
-    public boolean           allowFlight;
-    public boolean           isFlying;
-    public GameMode          mode;
-    public Location          location;
+    public Player       source;
 
-    public ArrayList<Player> vanishedFrom = new ArrayList<>();
+    public Location     location;
+    public GameMode     gameMode;
+    public boolean      allowFlight;
+    public boolean      isFlying;
+    public List<Player> vanishedFrom = new ArrayList<>();
 
-    public PlayerState(Player p) {
+    public PlayerState(Player source) {
 
-        player = p;
-        allowFlight = p.getAllowFlight();
-        isFlying = p.isFlying();
-        mode = p.getGameMode();
-        location = p.getLocation();
+        this.source = source;
+
+        location = source.getLocation();
+        gameMode = source.getGameMode();
+        allowFlight = source.getAllowFlight();
+        isFlying = source.isFlying();
+
         for (Player players : Bukkit.getServer().getOnlinePlayers()) {
-            if (players != p) {
-                if (!players.canSee(p)) {
+            if (players != source) {
+                if (!players.canSee(source)) {
                     vanishedFrom.add(players);
                 }
+            }
+        }
+    }
+
+    public void apply(Player player) {
+
+        player.teleport(location);
+        player.setGameMode(gameMode);
+        player.setAllowFlight(allowFlight);
+        player.setFlying(isFlying);
+
+        for (Player onlinePlayers : Bukkit.getServer().getOnlinePlayers()) {
+            if (!vanishedFrom.contains(onlinePlayers)) {
+                onlinePlayers.showPlayer(player);
             }
         }
     }
