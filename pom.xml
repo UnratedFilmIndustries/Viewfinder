@@ -3,7 +3,7 @@
 
     <groupId>de.unratedfilms</groupId>
     <artifactId>viewfinder</artifactId>
-    <version>2.4.0</version>
+    <version>2.4.1</version>
     <packaging>jar</packaging>
 
     <name>Viewfinder</name>
@@ -52,13 +52,13 @@
         <dependency>
             <groupId>com.quartercode</groupId>
             <artifactId>quarterbukkit-plugin</artifactId>
-            <version>0.2.1</version>
+            <version>0.3.0</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.quartercode</groupId>
             <artifactId>quarterbukkit-integration</artifactId>
-            <version>0.2.1</version>
+            <version>0.3.0</version>
         </dependency>
     </dependencies>
 
