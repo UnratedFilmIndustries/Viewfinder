@@ -1,3 +1,9 @@
+2.4.1
+-----
+
+### Fixes
+* Fixed the plugin not always loading after QuarterBukkit, which resulted in all kinds of crazy exceptions.
+
 2.4.0
 -----
 
