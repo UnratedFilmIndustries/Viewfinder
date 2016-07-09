@@ -3,6 +3,7 @@ version: ${project.version}
 description: ${project.description}
 prefix: ${project.name}
 authors: [LoadingByte, Chipmunk9998]
+website: ${url}
 main: ${main.class}
 
 commands:
