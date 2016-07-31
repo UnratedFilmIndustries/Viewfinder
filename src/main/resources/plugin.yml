@@ -12,3 +12,25 @@ commands:
         description: The main and only command for controlling the ViewFinder plugin.
         usage: /<command> <Command Label> [Parameters ...]
         aliases: [view]
+
+permissions:
+  viewfinder.*:
+    description: Grants access to all features.
+    default: op
+    children:
+      viewfinder.command.*: true
+  viewfinder.command.*:
+    description: Grants access to all commands.
+    children:
+      viewfinder.command.help: true
+      viewfinder.command.info: true
+      viewfinder.command.start: true
+      viewfinder.command.stop: true
+  viewfinder.command.help:
+    description: Grants access to use the help command.
+  viewfinder.command.info:
+    description: Grants access to showing the plugin information.
+  viewfinder.command.start:
+    description: Grants access to putting yourself into spectator mode.
+  viewfinder.command.stop:
+    description: Grants access to pulling yourself out of spectator mode.
