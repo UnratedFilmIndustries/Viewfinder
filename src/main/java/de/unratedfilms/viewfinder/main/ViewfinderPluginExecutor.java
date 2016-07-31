@@ -16,10 +16,7 @@ public class ViewfinderPluginExecutor {
 
         new ExceptionListener(plugin);
 
-        CommandExecutor commandExecutor = new CommandExecutor(plugin);
-        plugin.getCommand("viewfinder").setExecutor(commandExecutor);
-        plugin.getCommand("viewfinder").setTabCompleter(commandExecutor);
-
+        CommandExecutor commandExecutor = new CommandExecutor(plugin, "viewfinder");
         commandExecutor.addCommandHandler(new HelpCommand());
         commandExecutor.addCommandHandler(new InfoCommand());
         commandExecutor.addCommandHandler(new StartCommand());
